@@ -40,7 +40,7 @@ spec:
                    name: version
                spec:
                  audit:
-                   profile: Default
+                   profile: AllRequestBodies
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
@@ -65,4 +65,4 @@ spec:
     type: ManagedClusterConditionAvailable
   clusterSelector:
     matchExpressions:
-      - {key: environment, operator: In, values: ["dev"]}
+      - {key: env, operator: In, values: ["dev"]}
