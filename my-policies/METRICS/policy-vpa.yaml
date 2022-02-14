@@ -48,7 +48,7 @@ spec:
                   namespace: openshift-vertical-pod-autoscaler
                 spec:
                   targetNamespaces:
-                    - openshift-vertical-pod-autoscaler
+                  - openshift-vertical-pod-autoscaler
     - objectDefinition:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
