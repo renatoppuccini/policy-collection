@@ -94,20 +94,20 @@ spec:
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
-  name: binding-policy-comp-operator
+  name: binding-policy-vpa-operator
 placementRef:
-  name: placement-policy-comp-operator
+  name: placement-policy-vpa-operator
   kind: PlacementRule
   apiGroup: apps.open-cluster-management.io
 subjects:
-  - name: policy-comp-operator
+  - name: policy-vpa-operator
     kind: Policy
     apiGroup: policy.open-cluster-management.io
 ---
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
-  name: placement-policy-comp-operator
+  name: placement-policy-vpa-operator
 spec:
   clusterConditions:
     - status: "True"
