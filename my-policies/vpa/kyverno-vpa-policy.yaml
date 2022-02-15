@@ -44,6 +44,7 @@ spec:
                       synchronize: true
                       name: "{{ `{{request.object.metadata.name}}` }}"
                       namespace: "{{ `{{request.namespace}}` }}"
+                      apiVersion: autoscaling.k8s.io/v1
                       data:
                         spec:
                           targetRef:
