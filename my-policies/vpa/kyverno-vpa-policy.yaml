@@ -1,0 +1,78 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-kyverno-vpa-policy
+  annotations:
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-kyverno-add-vpa-policy
+        spec:
+          remediationAction: inform # will be overridden by remediationAction in parent policy
+          severity: low
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: kyverno.io/v1
+                kind: ClusterPolicy
+                metadata:
+                  name: add-vpa
+                  annotations:
+                    policies.kyverno.io/title: Add VPA
+                    policies.kyverno.io/category: Multi-Tenancy
+                    policies.kyverno.io/subject: VPA
+                    policies.kyverno.io/description: >-
+                      By default, Kubernetes creates Deployment Objects, but VPA objects are complementary.
+                      The VPA object is tied to a specific deployment containing the label of the application.
+                spec:
+                  rules:
+                  - name: create-vpa
+                    match:
+                      resources:
+                        kinds:
+                        - Deployment
+                    generate:
+                      kind: VerticalPodAutoscaler
+                      synchronize: true
+                      name: "{{ `{{request.object.metadata.name}}` }}"
+                      data:
+                        spec:
+                          targetRef:
+                            apiVersion: "apps/v1"
+                            kind: Deployment 
+                            name: "{{ `{{request.object.metadata.name}}` }}" 
+                          updatePolicy: 
+                            updateMode: "Auto"
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-kyverno-vpa-policy
+placementRef:
+  name: placement-policy-kyverno-vpa-policy
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: policy-kyverno-vpa-policy
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-policy-kyverno-vpa-policy
+spec:
+  clusterConditions:
+    - status: "True"
+      type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - {key: env, operator: In, values: ["dev"]}
