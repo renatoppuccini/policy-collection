@@ -43,6 +43,7 @@ spec:
                       kind: VerticalPodAutoscaler
                       synchronize: true
                       name: "{{ `{{request.object.metadata.name}}` }}"
+                      namespace: "{{ `{{request.namespace}}` }}"
                       data:
                         spec:
                           targetRef:
