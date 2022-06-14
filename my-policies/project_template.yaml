@@ -1,0 +1,171 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+  name: apply-project-template
+  namespace: my-policies
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: project-template
+        spec:
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - openshift-config
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: template.openshift.io/v1
+                kind: Template
+                metadata:
+                  creationTimestamp: null
+                  name: project-request
+                objects:
+                  - apiVersion: v1
+                    kind: Project
+                    metadata:
+                      annotations:
+                        openshift.io/description: ${PROJECT_DESCRIPTION}
+                        openshift.io/display-name: ${PROJECT_DISPLAYNAME}
+                        openshift.io/requester: ${PROJECT_REQUESTING_USER}
+                      creationTimestamp: null
+                      name: ${PROJECT_NAME}
+                    spec: {}
+                    status: {}
+                  - apiVersion: v1
+                    kind: ResourceQuota
+                    metadata:
+                      name: ${PROJECT_NAME}-quota
+                    spec:
+                      hard:
+                        persistentvolumeclaims: 5
+                        pods: 10
+                        requests.cpu: 4000m
+                        requests.memory: 8Gi
+                        requests.storage: 50Gi
+                        resourcequotas: 1
+                  - apiVersion: v1
+                    kind: LimitRange
+                    metadata:
+                      creationTimestamp: null
+                      name: ${PROJECT_NAME}-limits
+                    spec:
+                      limits:
+                        - default:
+                            cpu: 4000m
+                            memory: 1024Mi
+                          defaultRequest:
+                            cpu: 100m
+                            memory: 512Mi
+                          max:
+                            cpu: 4000m
+                            memory: 1024Mi
+                          min:
+                            cpu: 10m
+                            memory: 5Mi
+                          type: Container
+                  - apiVersion: v1
+                    groupNames:
+                      - system:serviceaccounts:${PROJECT_NAME}
+                    kind: RoleBinding
+                    metadata:
+                      creationTimestamp: null
+                      name: system:image-pullers
+                      namespace: ${PROJECT_NAME}
+                    roleRef:
+                      name: system:image-puller
+                    subjects:
+                      - kind: SystemGroup
+                        name: system:serviceaccounts:${PROJECT_NAME}
+                    userNames: null
+                  - apiVersion: v1
+                    groupNames: null
+                    kind: RoleBinding
+                    metadata:
+                      creationTimestamp: null
+                      name: system:image-builders
+                      namespace: ${PROJECT_NAME}
+                    roleRef:
+                      name: system:image-builder
+                    subjects:
+                      - kind: ServiceAccount
+                        name: builder
+                    userNames:
+                      - system:serviceaccount:${PROJECT_NAME}:builder
+                  - apiVersion: v1
+                    groupNames: null
+                    kind: RoleBinding
+                    metadata:
+                      creationTimestamp: null
+                      name: system:deployers
+                      namespace: ${PROJECT_NAME}
+                    roleRef:
+                      name: system:deployer
+                    subjects:
+                      - kind: ServiceAccount
+                        name: deployer
+                    userNames:
+                      - system:serviceaccount:${PROJECT_NAME}:deployer
+                  - apiVersion: v1
+                    groupNames: null
+                    kind: RoleBinding
+                    metadata:
+                      creationTimestamp: null
+                      name: admin
+                      namespace: ${PROJECT_NAME}
+                    roleRef:
+                      name: admin
+                    subjects:
+                      - kind: User
+                        name: ${PROJECT_ADMIN_USER}
+                    userNames:
+                      - ${PROJECT_ADMIN_USER}
+                parameters:
+                  - name: PROJECT_NAME
+                  - name: PROJECT_DISPLAYNAME
+                  - name: PROJECT_DESCRIPTION
+                  - name: PROJECT_ADMIN_USER
+                  - name: PROJECT_REQUESTING_USER
+          remediationAction: enforce
+          severity: low
+  remediationAction: inform
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-test
+  namespace: my-policies
+placementRef:
+  apiGroup: apps.open-cluster-management.io
+  kind: PlacementRule
+  name: placement-test
+subjects:
+  - apiGroup: policy.open-cluster-management.io
+    kind: Policy
+    name: test
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  generation: 2
+  name: placement-test
+  namespace: my-policies
+spec:
+  clusterConditions:
+    - status: 'True'
+      type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - key: env
+        operator: In
+        values:
+          - dev
