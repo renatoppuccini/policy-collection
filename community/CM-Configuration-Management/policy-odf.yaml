@@ -176,7 +176,7 @@ spec:
      type: ManagedClusterConditionAvailable
  clusterSelector:
    matchExpressions:
-     - key: environment
+     - key: storage
        operator: In
        values:
-         - dev
+         - true
