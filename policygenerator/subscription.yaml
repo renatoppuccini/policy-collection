@@ -12,7 +12,6 @@ spec:
   componentKinds:
     - group: apps.open-cluster-management.io
       kind: Subscription
-  descriptor: {}
   selector:
     matchExpressions:
       - key: app
@@ -29,7 +28,7 @@ metadata:
   namespace: policy-generator-demo
 spec:
   type: Git
-  pathname: https://github.com/stolostron/policy-collection.git
+  pathname: https://github.com/open-cluster-management-io/policy-collection.git
 ---
 apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
@@ -43,13 +42,6 @@ metadata:
   name: policy-generator-demo-subscription
   namespace: policy-generator-demo
 spec:
-  allow:
-    - apiVersion: policy.open-cluster-management.io/v1
-      kinds:
-        - "*"
-    - apiVersion: apps.open-cluster-management.io/v1
-      kinds:
-        - PlacementRule
   channel: policy-generator-demo/policy-generator-demo
   placement:
     placementRef:
