@@ -112,6 +112,7 @@ spec:
                         - openshift-storage
                         - openshift-user-workload-monitoring
                         - openshift-vsphere-infra
+                        - openshift-*
                         - rhacs-operator
                         - stackrox
                       processes:
