@@ -37,6 +37,7 @@ spec:
                         - kube-public
                         - kube-storage-version-migrator-operator
                         - kube-system
+                        - kube*
                         - local-quay
                         - multicluster-engine
                         - open-cluster-management
@@ -94,6 +95,7 @@ spec:
                         - openshift-kubevirt-infra
                         - openshift-machine-api
                         - openshift-machine-config-operator
+                        - openshift-managed-upgrade-operator
                         - openshift-marketplace
                         - openshift-monitoring
                         - openshift-multus
