@@ -32,6 +32,7 @@ spec:
                   match:
                     - excludedNamespaces:
                         - ansible-automation-platform
+                        - aap
                         - hive
                         - kube-node-lease
                         - kube-public
@@ -51,6 +52,7 @@ spec:
                         - openshift-apiserver-operator
                         - openshift-authentication
                         - openshift-authentication-operator
+                        - openshift-azure-operator
                         - openshift-cloud-controller-manager-operator
                         - openshift-cloud-credential-operator
                         - openshift-cloud-network-config-controller
